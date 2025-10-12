@@ -1,0 +1,82 @@
+version: "3.8"
+
+# Development override for docker-compose.yml
+services:
+  neurodx-api:
+    build:
+      target: development
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    volumes:
+      - .:/app
+      - /app/__pycache__
+      - /app/src/__pycache__
+    command: ["python", "main.py", "--mode", "api"]
+    ports:
+      - "5000:5000"
+      - "5678:5678" # Debug port
+
+  monai-label:
+    volumes:
+      - .:/app
+    environment:
+      - MONAI_LABEL_DEBUG=1
+
+  # Add development tools
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: neurodx-jupyter
+    ports:
+      - "8888:8888"
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+    volumes:
+      - .:/app
+      - ./notebooks:/app/notebooks
+    command:
+      [
+        "jupyter",
+        "lab",
+        "--ip=0.0.0.0",
+        "--port=8888",
+        "--no-browser",
+        "--allow-root",
+      ]
+    networks:
+      - neurodx-network
+
+  # Development database with exposed port
+  postgres:
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=neurodx_dev
+      - POSTGRES_USER=dev_user
+      - POSTGRES_PASSWORD=dev_password
+
+  # Redis with exposed port for debugging
+  redis:
+    ports:
+      - "6379:6379"
+
+  # InfluxDB with exposed port
+  influxdb:
+    ports:
+      - "8086:8086"
+
+  # MinIO with exposed ports
+  minio:
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+volumes:
+  # Override volumes for development
+  postgres_data:
+  redis_data:
+  influxdb_data:
+  minio_data:

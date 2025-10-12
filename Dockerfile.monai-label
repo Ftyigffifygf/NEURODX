@@ -1,0 +1,30 @@
+# MONAI Label server Dockerfile
+FROM projectmonai/monailabel:latest
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Install additional dependencies
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+# Copy MONAI Label applications
+COPY monai_apps /app/monai_apps
+COPY src/services/monai_label /app/src/services/monai_label
+
+# Create necessary directories
+RUN mkdir -p /app/data/images /app/models /app/logs
+
+# Set working directory
+WORKDIR /app
+
+# Expose MONAI Label port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8000/info/ || exit 1
+
+# Start MONAI Label server
+CMD ["monailabel", "start_server", "--app", "/app/monai_apps/neurodx", "--studies", "/app/data/images", "--conf", "use_cache", "true"]
