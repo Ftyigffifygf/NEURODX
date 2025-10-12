@@ -1,0 +1,310 @@
+{
+    "dashboard": {
+        "id": null,
+        "title": "NeuroDx-MultiModal System Overview",
+        "tags": [
+            "neurodx",
+            "system",
+            "overview"
+        ],
+        "style": "dark",
+        "timezone": "browser",
+        "refresh": "30s",
+        "time": {
+            "from": "now-1h",
+            "to": "now"
+        },
+        "panels": [
+            {
+                "id": 1,
+                "title": "System Status",
+                "type": "stat",
+                "gridPos": {
+                    "h": 4,
+                    "w": 6,
+                    "x": 0,
+                    "y": 0
+                },
+                "targets": [
+                    {
+                        "expr": "up{job=\"neurodx-api\"}",
+                        "legendFormat": "API Status"
+                    },
+                    {
+                        "expr": "up{job=\"monai-label\"}",
+                        "legendFormat": "MONAI Label Status"
+                    }
+                ],
+                "fieldConfig": {
+                    "defaults": {
+                        "mappings": [
+                            {
+                                "options": {
+                                    "0": {
+                                        "text": "DOWN",
+                                        "color": "red"
+                                    }
+                                },
+                                "type": "value"
+                            },
+                            {
+                                "options": {
+                                    "1": {
+                                        "text": "UP",
+                                        "color": "green"
+                                    }
+                                },
+                                "type": "value"
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "id": 2,
+                "title": "Request Rate",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 4
+                },
+                "targets": [
+                    {
+                        "expr": "rate(http_requests_total[5m])",
+                        "legendFormat": "{{method}} {{endpoint}}"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Requests/sec",
+                        "min": 0
+                    }
+                ]
+            },
+            {
+                "id": 3,
+                "title": "Response Time",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 4
+                },
+                "targets": [
+                    {
+                        "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m]))",
+                        "legendFormat": "50th percentile"
+                    },
+                    {
+                        "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+                        "legendFormat": "95th percentile"
+                    },
+                    {
+                        "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))",
+                        "legendFormat": "99th percentile"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Seconds",
+                        "min": 0
+                    }
+                ]
+            },
+            {
+                "id": 4,
+                "title": "Error Rate",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 12
+                },
+                "targets": [
+                    {
+                        "expr": "rate(http_requests_total{status_code=~\"4..\"}[5m])",
+                        "legendFormat": "4xx errors"
+                    },
+                    {
+                        "expr": "rate(http_requests_total{status_code=~\"5..\"}[5m])",
+                        "legendFormat": "5xx errors"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Errors/sec",
+                        "min": 0
+                    }
+                ]
+            },
+            {
+                "id": 5,
+                "title": "CPU Usage",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 12
+                },
+                "targets": [
+                    {
+                        "expr": "system_cpu_usage_percent",
+                        "legendFormat": "CPU Usage %"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Percent",
+                        "min": 0,
+                        "max": 100
+                    }
+                ]
+            },
+            {
+                "id": 6,
+                "title": "Memory Usage",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 20
+                },
+                "targets": [
+                    {
+                        "expr": "system_memory_usage_bytes / 1024 / 1024 / 1024",
+                        "legendFormat": "Memory Used (GB)"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "GB",
+                        "min": 0
+                    }
+                ]
+            },
+            {
+                "id": 7,
+                "title": "GPU Utilization",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 20
+                },
+                "targets": [
+                    {
+                        "expr": "gpu_utilization_percent",
+                        "legendFormat": "GPU {{gpu_id}} Utilization"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Percent",
+                        "min": 0,
+                        "max": 100
+                    }
+                ]
+            },
+            {
+                "id": 8,
+                "title": "Model Inference Rate",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 28
+                },
+                "targets": [
+                    {
+                        "expr": "rate(model_inference_total[5m])",
+                        "legendFormat": "{{model_type}} inferences/sec"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Inferences/sec",
+                        "min": 0
+                    }
+                ]
+            },
+            {
+                "id": 9,
+                "title": "Model Inference Time",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 28
+                },
+                "targets": [
+                    {
+                        "expr": "histogram_quantile(0.95, rate(model_inference_duration_seconds_bucket[5m]))",
+                        "legendFormat": "{{model_type}} 95th percentile"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Seconds",
+                        "min": 0
+                    }
+                ]
+            },
+            {
+                "id": 10,
+                "title": "Database Connections",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 36
+                },
+                "targets": [
+                    {
+                        "expr": "database_connections_active",
+                        "legendFormat": "{{database}} connections"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Connections",
+                        "min": 0
+                    }
+                ]
+            },
+            {
+                "id": 11,
+                "title": "Cache Hit Rate",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 36
+                },
+                "targets": [
+                    {
+                        "expr": "cache_hit_rate_percent",
+                        "legendFormat": "{{cache_type}} hit rate"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Percent",
+                        "min": 0,
+                        "max": 100
+                    }
+                ]
+            }
+        ]
+    }
+}

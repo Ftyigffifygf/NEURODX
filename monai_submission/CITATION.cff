@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "NeuroDx-MultiModal: AI-Powered Neurodegenerative Disease Diagnostics"
+version: "1.0.0"
+date-released: "2024-10-12"
+url: "https://github.com/yourusername/neurodx-multimodal"
+repository-code: "https://github.com/yourusername/neurodx-multimodal"
+license: Apache-2.0
+authors:
+  - family-names: "Developer"
+    given-names: "NeuroDx"
+    email: "developer@neurodx.com"
+keywords:
+  - "medical imaging"
+  - "artificial intelligence"
+  - "neurodegenerative diseases"
+  - "MONAI"
+  - "multi-modal analysis"
+  - "SwinUNETR"
+  - "federated learning"
+  - "active learning"
+abstract: >
+  NeuroDx-MultiModal is a comprehensive diagnostic assistant system 
+  for detecting and monitoring neurodegenerative diseases through 
+  multi-modal medical imaging and wearable sensor data fusion, 
+  built on the MONAI framework. The system integrates MONAI Core 
+  for medical image processing, MONAI Label for active learning, 
+  and MONAI Deploy for federated learning across institutions.
+references:
+  - type: article
+    title: "MONAI: An open-source framework for deep learning in healthcare"
+    authors:
+      - family-names: "Cardoso"
+        given-names: "M. Jorge"
+    journal: "arXiv preprint"
+    year: 2022
+  - type: article
+    title: "Swin UNETR: Swin Transformers for Semantic Segmentation of Brain Tumors in MRI Images"
+    authors:
+      - family-names: "Hatamizadeh"
+        given-names: "Ali"
+    journal: "MICCAI 2022"
+    year: 2022

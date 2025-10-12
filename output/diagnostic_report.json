@@ -1,0 +1,43 @@
+{
+  "application": {
+    "name": "NeuroDx-MultiModal-Simple",
+    "version": "1.0.0"
+  },
+  "analysis_results": {
+    "segmentation_shape": [
+      96,
+      96,
+      96
+    ],
+    "unique_labels": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "diagnostics": {
+      "volumes": {
+        "background": 220766.0,
+        "hippocampus": 221455.0,
+        "ventricles": 221614.0,
+        "cortex": 220901.0
+      },
+      "confidence_score": 0.799926323727712,
+      "risk_scores": {
+        "alzheimer_disease": 0.0,
+        "mild_cognitive_impairment": 0.0,
+        "healthy": 1.0
+      },
+      "recommendations": [
+        "Continue routine monitoring",
+        "Maintain healthy lifestyle",
+        "Regular cognitive assessments"
+      ]
+    }
+  },
+  "model_info": {
+    "architecture": "SwinUNETR",
+    "framework": "MONAI + PyTorch",
+    "device": "cpu"
+  }
+}

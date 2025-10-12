@@ -1,0 +1,780 @@
+{
+    "dashboard": {
+        "id": null,
+        "title": "NeuroDx-MultiModal Comprehensive Monitoring",
+        "tags": [
+            "neurodx",
+            "comprehensive",
+            "monitoring",
+            "alerts"
+        ],
+        "style": "dark",
+        "timezone": "browser",
+        "refresh": "30s",
+        "time": {
+            "from": "now-1h",
+            "to": "now"
+        },
+        "panels": [
+            {
+                "id": 1,
+                "title": "System Health Overview",
+                "type": "stat",
+                "gridPos": {
+                    "h": 6,
+                    "w": 24,
+                    "x": 0,
+                    "y": 0
+                },
+                "targets": [
+                    {
+                        "expr": "up{job=\"neurodx-api\"}",
+                        "legendFormat": "API"
+                    },
+                    {
+                        "expr": "up{job=\"monai-label\"}",
+                        "legendFormat": "MONAI Label"
+                    },
+                    {
+                        "expr": "up{job=\"postgres\"}",
+                        "legendFormat": "PostgreSQL"
+                    },
+                    {
+                        "expr": "up{job=\"redis\"}",
+                        "legendFormat": "Redis"
+                    },
+                    {
+                        "expr": "up{job=\"influxdb\"}",
+                        "legendFormat": "InfluxDB"
+                    },
+                    {
+                        "expr": "up{job=\"minio\"}",
+                        "legendFormat": "MinIO"
+                    },
+                    {
+                        "expr": "up{job=\"prometheus\"}",
+                        "legendFormat": "Prometheus"
+                    },
+                    {
+                        "expr": "up{job=\"grafana\"}",
+                        "legendFormat": "Grafana"
+                    }
+                ],
+                "fieldConfig": {
+                    "defaults": {
+                        "mappings": [
+                            {
+                                "options": {
+                                    "0": {
+                                        "text": "DOWN",
+                                        "color": "red"
+                                    }
+                                },
+                                "type": "value"
+                            },
+                            {
+                                "options": {
+                                    "1": {
+                                        "text": "UP",
+                                        "color": "green"
+                                    }
+                                },
+                                "type": "value"
+                            }
+                        ],
+                        "thresholds": {
+                            "steps": [
+                                {
+                                    "color": "red",
+                                    "value": 0
+                                },
+                                {
+                                    "color": "green",
+                                    "value": 1
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                "id": 2,
+                "title": "Active Alerts",
+                "type": "table",
+                "gridPos": {
+                    "h": 8,
+                    "w": 24,
+                    "x": 0,
+                    "y": 6
+                },
+                "targets": [
+                    {
+                        "expr": "ALERTS{alertstate=\"firing\"}",
+                        "format": "table",
+                        "instant": true
+                    }
+                ],
+                "fieldConfig": {
+                    "defaults": {
+                        "custom": {
+                            "displayMode": "table"
+                        }
+                    }
+                },
+                "transformations": [
+                    {
+                        "id": "organize",
+                        "options": {
+                            "excludeByName": {
+                                "__name__": true,
+                                "job": true,
+                                "instance": true
+                            },
+                            "renameByName": {
+                                "alertname": "Alert",
+                                "severity": "Severity",
+                                "service": "Service",
+                                "Value": "Current Value"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "id": 3,
+                "title": "Request Rate",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 14
+                },
+                "targets": [
+                    {
+                        "expr": "rate(http_requests_total[5m])",
+                        "legendFormat": "{{method}} {{endpoint}}"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Requests/sec",
+                        "min": 0
+                    }
+                ],
+                "alert": {
+                    "conditions": [
+                        {
+                            "evaluator": {
+                                "params": [
+                                    100
+                                ],
+                                "type": "gt"
+                            },
+                            "operator": {
+                                "type": "and"
+                            },
+                            "query": {
+                                "params": [
+                                    "A",
+                                    "5m",
+                                    "now"
+                                ]
+                            },
+                            "reducer": {
+                                "params": [],
+                                "type": "avg"
+                            },
+                            "type": "query"
+                        }
+                    ],
+                    "executionErrorState": "alerting",
+                    "for": "2m",
+                    "frequency": "10s",
+                    "handler": 1,
+                    "name": "High Request Rate",
+                    "noDataState": "no_data",
+                    "notifications": []
+                }
+            },
+            {
+                "id": 4,
+                "title": "Response Time Percentiles",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 14
+                },
+                "targets": [
+                    {
+                        "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m]))",
+                        "legendFormat": "50th percentile"
+                    },
+                    {
+                        "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+                        "legendFormat": "95th percentile"
+                    },
+                    {
+                        "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))",
+                        "legendFormat": "99th percentile"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Seconds",
+                        "min": 0
+                    }
+                ],
+                "alert": {
+                    "conditions": [
+                        {
+                            "evaluator": {
+                                "params": [
+                                    2
+                                ],
+                                "type": "gt"
+                            },
+                            "operator": {
+                                "type": "and"
+                            },
+                            "query": {
+                                "params": [
+                                    "B",
+                                    "5m",
+                                    "now"
+                                ]
+                            },
+                            "reducer": {
+                                "params": [],
+                                "type": "avg"
+                            },
+                            "type": "query"
+                        }
+                    ],
+                    "executionErrorState": "alerting",
+                    "for": "5m",
+                    "frequency": "10s",
+                    "handler": 1,
+                    "name": "High Response Time",
+                    "noDataState": "no_data",
+                    "notifications": []
+                }
+            },
+            {
+                "id": 5,
+                "title": "Error Rate",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 22
+                },
+                "targets": [
+                    {
+                        "expr": "rate(http_requests_total{status_code=~\"4..\"}[5m])",
+                        "legendFormat": "4xx errors"
+                    },
+                    {
+                        "expr": "rate(http_requests_total{status_code=~\"5..\"}[5m])",
+                        "legendFormat": "5xx errors"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Errors/sec",
+                        "min": 0
+                    }
+                ],
+                "alert": {
+                    "conditions": [
+                        {
+                            "evaluator": {
+                                "params": [
+                                    10
+                                ],
+                                "type": "gt"
+                            },
+                            "operator": {
+                                "type": "and"
+                            },
+                            "query": {
+                                "params": [
+                                    "B",
+                                    "5m",
+                                    "now"
+                                ]
+                            },
+                            "reducer": {
+                                "params": [],
+                                "type": "avg"
+                            },
+                            "type": "query"
+                        }
+                    ],
+                    "executionErrorState": "alerting",
+                    "for": "3m",
+                    "frequency": "10s",
+                    "handler": 1,
+                    "name": "High Error Rate",
+                    "noDataState": "no_data",
+                    "notifications": []
+                }
+            },
+            {
+                "id": 6,
+                "title": "System Resources",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 22
+                },
+                "targets": [
+                    {
+                        "expr": "system_cpu_usage_percent",
+                        "legendFormat": "CPU Usage %"
+                    },
+                    {
+                        "expr": "(system_memory_usage_bytes / (system_memory_usage_bytes + system_memory_available_bytes)) * 100",
+                        "legendFormat": "Memory Usage %"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Percent",
+                        "min": 0,
+                        "max": 100
+                    }
+                ],
+                "alert": {
+                    "conditions": [
+                        {
+                            "evaluator": {
+                                "params": [
+                                    80
+                                ],
+                                "type": "gt"
+                            },
+                            "operator": {
+                                "type": "and"
+                            },
+                            "query": {
+                                "params": [
+                                    "A",
+                                    "5m",
+                                    "now"
+                                ]
+                            },
+                            "reducer": {
+                                "params": [],
+                                "type": "avg"
+                            },
+                            "type": "query"
+                        }
+                    ],
+                    "executionErrorState": "alerting",
+                    "for": "5m",
+                    "frequency": "10s",
+                    "handler": 1,
+                    "name": "High Resource Usage",
+                    "noDataState": "no_data",
+                    "notifications": []
+                }
+            },
+            {
+                "id": 7,
+                "title": "GPU Utilization",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 30
+                },
+                "targets": [
+                    {
+                        "expr": "gpu_utilization_percent",
+                        "legendFormat": "GPU {{gpu_id}} Utilization"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Percent",
+                        "min": 0,
+                        "max": 100
+                    }
+                ],
+                "alert": {
+                    "conditions": [
+                        {
+                            "evaluator": {
+                                "params": [
+                                    95
+                                ],
+                                "type": "gt"
+                            },
+                            "operator": {
+                                "type": "and"
+                            },
+                            "query": {
+                                "params": [
+                                    "A",
+                                    "5m",
+                                    "now"
+                                ]
+                            },
+                            "reducer": {
+                                "params": [],
+                                "type": "avg"
+                            },
+                            "type": "query"
+                        }
+                    ],
+                    "executionErrorState": "alerting",
+                    "for": "5m",
+                    "frequency": "10s",
+                    "handler": 1,
+                    "name": "High GPU Utilization",
+                    "noDataState": "no_data",
+                    "notifications": []
+                }
+            },
+            {
+                "id": 8,
+                "title": "GPU Memory Usage",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 30
+                },
+                "targets": [
+                    {
+                        "expr": "(gpu_memory_usage_bytes / gpu_memory_total_bytes) * 100",
+                        "legendFormat": "GPU {{gpu_id}} Memory %"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Percent",
+                        "min": 0,
+                        "max": 100
+                    }
+                ],
+                "alert": {
+                    "conditions": [
+                        {
+                            "evaluator": {
+                                "params": [
+                                    90
+                                ],
+                                "type": "gt"
+                            },
+                            "operator": {
+                                "type": "and"
+                            },
+                            "query": {
+                                "params": [
+                                    "A",
+                                    "5m",
+                                    "now"
+                                ]
+                            },
+                            "reducer": {
+                                "params": [],
+                                "type": "avg"
+                            },
+                            "type": "query"
+                        }
+                    ],
+                    "executionErrorState": "alerting",
+                    "for": "5m",
+                    "frequency": "10s",
+                    "handler": 1,
+                    "name": "High GPU Memory Usage",
+                    "noDataState": "no_data",
+                    "notifications": []
+                }
+            },
+            {
+                "id": 9,
+                "title": "Model Inference Metrics",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 38
+                },
+                "targets": [
+                    {
+                        "expr": "rate(model_inference_total[5m])",
+                        "legendFormat": "{{model_type}} inferences/sec"
+                    },
+                    {
+                        "expr": "rate(model_inference_total{status=\"error\"}[5m])",
+                        "legendFormat": "{{model_type}} errors/sec"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Operations/sec",
+                        "min": 0
+                    }
+                ],
+                "alert": {
+                    "conditions": [
+                        {
+                            "evaluator": {
+                                "params": [
+                                    0.1
+                                ],
+                                "type": "gt"
+                            },
+                            "operator": {
+                                "type": "and"
+                            },
+                            "query": {
+                                "params": [
+                                    "B",
+                                    "5m",
+                                    "now"
+                                ]
+                            },
+                            "reducer": {
+                                "params": [],
+                                "type": "avg"
+                            },
+                            "type": "query"
+                        }
+                    ],
+                    "executionErrorState": "alerting",
+                    "for": "3m",
+                    "frequency": "10s",
+                    "handler": 1,
+                    "name": "High Model Inference Failure Rate",
+                    "noDataState": "no_data",
+                    "notifications": []
+                }
+            },
+            {
+                "id": 10,
+                "title": "Model Inference Time",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 38
+                },
+                "targets": [
+                    {
+                        "expr": "histogram_quantile(0.95, rate(model_inference_duration_seconds_bucket[5m]))",
+                        "legendFormat": "{{model_type}} 95th percentile"
+                    },
+                    {
+                        "expr": "histogram_quantile(0.50, rate(model_inference_duration_seconds_bucket[5m]))",
+                        "legendFormat": "{{model_type}} median"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Seconds",
+                        "min": 0
+                    }
+                ],
+                "alert": {
+                    "conditions": [
+                        {
+                            "evaluator": {
+                                "params": [
+                                    30
+                                ],
+                                "type": "gt"
+                            },
+                            "operator": {
+                                "type": "and"
+                            },
+                            "query": {
+                                "params": [
+                                    "A",
+                                    "5m",
+                                    "now"
+                                ]
+                            },
+                            "reducer": {
+                                "params": [],
+                                "type": "avg"
+                            },
+                            "type": "query"
+                        }
+                    ],
+                    "executionErrorState": "alerting",
+                    "for": "5m",
+                    "frequency": "10s",
+                    "handler": 1,
+                    "name": "Slow Model Inference",
+                    "noDataState": "no_data",
+                    "notifications": []
+                }
+            },
+            {
+                "id": 11,
+                "title": "Database Performance",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 46
+                },
+                "targets": [
+                    {
+                        "expr": "database_connections_active",
+                        "legendFormat": "{{database}} connections"
+                    },
+                    {
+                        "expr": "cache_hit_rate_percent",
+                        "legendFormat": "{{cache_type}} hit rate %"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Count / Percent",
+                        "min": 0
+                    }
+                ],
+                "alert": {
+                    "conditions": [
+                        {
+                            "evaluator": {
+                                "params": [
+                                    80
+                                ],
+                                "type": "gt"
+                            },
+                            "operator": {
+                                "type": "and"
+                            },
+                            "query": {
+                                "params": [
+                                    "A",
+                                    "5m",
+                                    "now"
+                                ]
+                            },
+                            "reducer": {
+                                "params": [],
+                                "type": "avg"
+                            },
+                            "type": "query"
+                        }
+                    ],
+                    "executionErrorState": "alerting",
+                    "for": "5m",
+                    "frequency": "10s",
+                    "handler": 1,
+                    "name": "High Database Connection Count",
+                    "noDataState": "no_data",
+                    "notifications": []
+                }
+            },
+            {
+                "id": 12,
+                "title": "Disk Usage",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 46
+                },
+                "targets": [
+                    {
+                        "expr": "(system_disk_usage_bytes / (system_disk_usage_bytes + system_disk_free_bytes)) * 100",
+                        "legendFormat": "{{mount_point}} usage %"
+                    }
+                ],
+                "yAxes": [
+                    {
+                        "label": "Percent",
+                        "min": 0,
+                        "max": 100
+                    }
+                ],
+                "alert": {
+                    "conditions": [
+                        {
+                            "evaluator": {
+                                "params": [
+                                    85
+                                ],
+                                "type": "gt"
+                            },
+                            "operator": {
+                                "type": "and"
+                            },
+                            "query": {
+                                "params": [
+                                    "A",
+                                    "5m",
+                                    "now"
+                                ]
+                            },
+                            "reducer": {
+                                "params": [],
+                                "type": "avg"
+                            },
+                            "type": "query"
+                        }
+                    ],
+                    "executionErrorState": "alerting",
+                    "for": "5m",
+                    "frequency": "10s",
+                    "handler": 1,
+                    "name": "High Disk Usage",
+                    "noDataState": "no_data",
+                    "notifications": []
+                }
+            }
+        ],
+        "templating": {
+            "list": [
+                {
+                    "name": "service",
+                    "type": "query",
+                    "query": "label_values(up, job)",
+                    "refresh": 1,
+                    "includeAll": true,
+                    "multi": true
+                },
+                {
+                    "name": "instance",
+                    "type": "query",
+                    "query": "label_values(up{job=~\"$service\"}, instance)",
+                    "refresh": 1,
+                    "includeAll": true,
+                    "multi": true
+                }
+            ]
+        },
+        "annotations": {
+            "list": [
+                {
+                    "name": "Alerts",
+                    "datasource": "Prometheus",
+                    "enable": true,
+                    "expr": "ALERTS{alertstate=\"firing\"}",
+                    "iconColor": "red",
+                    "titleFormat": "{{alertname}}",
+                    "textFormat": "{{service}}: {{summary}}"
+                }
+            ]
+        }
+    }
+}

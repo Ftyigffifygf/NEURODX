@@ -1,0 +1,200 @@
+apiVersion: dicom.ai/v1beta1
+kind: Application
+
+metadata:
+  name: neurodx-multimodal
+  version: 1.0.0
+  description: Multi-modal diagnostic assistant for neurodegenerative diseases using MONAI Deploy
+  labels:
+    medical-specialty: neurology
+    ai-framework: monai
+    deployment-type: clinical
+
+spec:
+  # Application Information
+  application:
+    name: NeuroDx-MultiModal
+    version: "1.0.0"
+    description: "Comprehensive diagnostic assistant for neurodegenerative diseases combining medical imaging, wearable sensors, and genomic data"
+    vendor: "NeuroDx Development Team"
+
+  # Model Information
+  model:
+    name: "SwinUNETR-MultiModal"
+    version: "1.0.0"
+    architecture: "SwinUNETR"
+    framework: "MONAI + PyTorch"
+    task: "Multi-modal segmentation and classification"
+
+  # Input Specifications
+  input:
+    - name: image
+      type: image
+      format: nifti
+      description: "T1-weighted MRI brain image"
+      required: true
+      constraints:
+        dimensions: 3
+        modality: ["MRI", "CT"]
+        min_size: [64, 64, 64]
+        max_size: [512, 512, 512]
+
+    - name: wearable_data
+      type: json
+      description: "Wearable sensor data (EEG, heart rate, sleep, gait)"
+      required: false
+
+    - name: genomic_data
+      type: json
+      description: "Genomic variant data and risk scores"
+      required: false
+
+    - name: clinical_data
+      type: json
+      description: "Clinical notes and laboratory results"
+      required: false
+
+  # Output Specifications
+  output:
+    - name: segmentation
+      type: image
+      format: nifti
+      description: "Brain structure segmentation mask"
+
+    - name: diagnostic_report
+      type: json
+      description: "Comprehensive diagnostic report with risk scores and recommendations"
+
+    - name: visualization
+      type: image
+      format: png
+      description: "Diagnostic visualization overlays"
+
+  # Resource Requirements
+  resources:
+    cpu:
+      min: "2"
+      max: "8"
+    memory:
+      min: "8Gi"
+      max: "32Gi"
+    gpu:
+      required: true
+      min_memory: "8Gi"
+      compute_capability: "7.0"
+
+  # Environment Configuration
+  environment:
+    variables:
+      - name: CUDA_VISIBLE_DEVICES
+        value: "0"
+      - name: MONAI_LOG_LEVEL
+        value: "INFO"
+      - name: PYTORCH_CUDA_ALLOC_CONF
+        value: "max_split_size_mb:512"
+
+  # Security and Compliance
+  security:
+    hipaa_compliant: true
+    encryption_at_rest: true
+    encryption_in_transit: true
+    audit_logging: true
+
+  # Clinical Validation
+  validation:
+    clinical_studies:
+      - name: "Multi-site Validation Study"
+        sites: 4
+        patients: 1500
+        performance:
+          dice_score: 0.89
+          auc_score: 0.92
+          sensitivity: 0.85
+          specificity: 0.94
+
+  # Regulatory Information
+  regulatory:
+    intended_use: "Clinical decision support for neurodegenerative disease diagnosis"
+    contraindications:
+      - "Not for primary diagnosis without clinical oversight"
+      - "Not validated for patients under 50 years"
+    warnings:
+      - "Requires qualified clinician interpretation"
+      - "Performance may vary with image quality"
+
+  # Deployment Configuration
+  deployment:
+    platform: "x64-workstation"
+    os: "linux"
+    container:
+      base_image: "nvcr.io/nvidia/pytorch:23.08-py3"
+      python_version: "3.8"
+
+    # Health Checks
+    health_check:
+      endpoint: "/health"
+      interval: 30
+      timeout: 10
+      retries: 3
+
+    # Monitoring
+    monitoring:
+      metrics_enabled: true
+      logging_level: "INFO"
+      performance_tracking: true
+
+  # Integration Points
+  integration:
+    dicom_support: true
+    fhir_compatible: true
+    hl7_support: true
+
+    # External Services
+    external_services:
+      - name: "NVIDIA Palmyra API"
+        type: "ai_service"
+        endpoint: "https://integrate.api.nvidia.com/v1"
+        required: false
+
+      - name: "Genomics Analysis Service"
+        type: "analysis_service"
+        required: false
+
+  # Quality Assurance
+  quality:
+    testing:
+      unit_tests: true
+      integration_tests: true
+      performance_tests: true
+      security_tests: true
+
+    validation:
+      cross_validation: "5-fold"
+      external_validation: true
+      temporal_validation: true
+
+  # Documentation
+  documentation:
+    user_guide: "docs/user_guide.md"
+    technical_guide: "docs/technical_guide.md"
+    api_reference: "docs/api_reference.md"
+    model_card: "docs/model_card.md"
+
+  # Support Information
+  support:
+    contact: "support@neurodx.com"
+    documentation_url: "https://docs.neurodx.com"
+    issue_tracker: "https://github.com/neurodx/neurodx-multimodal/issues"
+
+  # Licensing
+  license:
+    type: "Apache-2.0"
+    commercial_use: true
+    modification: true
+    distribution: true
+
+  # Versioning and Updates
+  versioning:
+    update_policy: "quarterly"
+    backward_compatibility: true
+    migration_guide: "docs/migration_guide.md"

@@ -1,0 +1,254 @@
+groups:
+  - name: neurodx-api-alerts
+    rules:
+      # High error rate
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status_code=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          service: neurodx-api
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.endpoint }}"
+
+      # High response time
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: neurodx-api
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }}s for {{ $labels.endpoint }}"
+
+      # API service down
+      - alert: APIServiceDown
+        expr: up{job="neurodx-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: neurodx-api
+        annotations:
+          summary: "NeuroDx API service is down"
+          description: "NeuroDx API service has been down for more than 1 minute"
+
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: system_cpu_usage_percent > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: (system_memory_usage_bytes / (system_memory_usage_bytes + system_memory_available_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+
+      # GPU utilization too low (might indicate GPU not being used)
+      - alert: LowGPUUtilization
+        expr: gpu_utilization_percent < 10
+        for: 10m
+        labels:
+          severity: warning
+          service: gpu
+        annotations:
+          summary: "Low GPU utilization detected"
+          description: "GPU {{ $labels.gpu_id }} utilization is {{ $value }}% for more than 10 minutes"
+
+      # GPU memory usage too high
+      - alert: HighGPUMemoryUsage
+        expr: (gpu_memory_usage_bytes / gpu_memory_total_bytes) * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+          service: gpu
+        annotations:
+          summary: "High GPU memory usage detected"
+          description: "GPU {{ $labels.gpu_id }} memory usage is {{ $value }}%"
+
+  - name: neurodx-monai-alerts
+    rules:
+      # MONAI Label service down
+      - alert: MONAILabelServiceDown
+        expr: up{job="monai-label"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: monai-label
+        annotations:
+          summary: "MONAI Label service is down"
+          description: "MONAI Label service has been down for more than 2 minutes"
+
+      # Model inference failures
+      - alert: HighModelInferenceFailureRate
+        expr: rate(model_inference_total{status="error"}[5m]) / rate(model_inference_total[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+          service: ml-inference
+        annotations:
+          summary: "High model inference failure rate"
+          description: "Model inference failure rate is {{ $value | humanizePercentage }} for {{ $labels.model_type }}"
+
+      # Slow model inference
+      - alert: SlowModelInference
+        expr: histogram_quantile(0.95, rate(model_inference_duration_seconds_bucket[5m])) > 30
+        for: 5m
+        labels:
+          severity: warning
+          service: ml-inference
+        annotations:
+          summary: "Slow model inference detected"
+          description: "95th percentile inference time is {{ $value }}s for {{ $labels.model_type }}"
+
+  - name: neurodx-database-alerts
+    rules:
+      # Database connection issues
+      - alert: DatabaseConnectionHigh
+        expr: database_connections_active > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "High database connection count"
+          description: "Database {{ $labels.database }} has {{ $value }} active connections"
+
+      # PostgreSQL down
+      - alert: PostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: postgres
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database has been down for more than 1 minute"
+
+      # Redis down
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+        annotations:
+          summary: "Redis is down"
+          description: "Redis cache has been down for more than 1 minute"
+
+      # Low cache hit rate
+      - alert: LowCacheHitRate
+        expr: cache_hit_rate_percent < 70
+        for: 10m
+        labels:
+          severity: warning
+          service: cache
+        annotations:
+          summary: "Low cache hit rate"
+          description: "Cache hit rate is {{ $value }}% for {{ $labels.cache_type }}"
+
+  - name: neurodx-storage-alerts
+    rules:
+      # High disk usage
+      - alert: HighDiskUsage
+        expr: (system_disk_usage_bytes / (system_disk_usage_bytes + system_disk_free_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: storage
+        annotations:
+          summary: "High disk usage detected"
+          description: "Disk usage is {{ $value }}% on {{ $labels.mount_point }}"
+
+      # Critical disk usage
+      - alert: CriticalDiskUsage
+        expr: (system_disk_usage_bytes / (system_disk_usage_bytes + system_disk_free_bytes)) * 100 > 95
+        for: 1m
+        labels:
+          severity: critical
+          service: storage
+        annotations:
+          summary: "Critical disk usage detected"
+          description: "Disk usage is {{ $value }}% on {{ $labels.mount_point }}"
+
+      # MinIO down
+      - alert: MinIODown
+        expr: up{job="minio"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: minio
+        annotations:
+          summary: "MinIO object storage is down"
+          description: "MinIO has been down for more than 2 minutes"
+
+      # InfluxDB down
+      - alert: InfluxDBDown
+        expr: up{job="influxdb"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: influxdb
+        annotations:
+          summary: "InfluxDB is down"
+          description: "InfluxDB has been down for more than 2 minutes"
+
+  - name: neurodx-security-alerts
+    rules:
+      # Unusual request patterns (potential attack)
+      - alert: UnusualRequestPattern
+        expr: rate(http_requests_total[1m]) > 100
+        for: 2m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "Unusual request pattern detected"
+          description: "Request rate is {{ $value }} requests/second from {{ $labels.instance }}"
+
+      # High 4xx error rate (potential brute force)
+      - alert: High4xxErrorRate
+        expr: rate(http_requests_total{status_code=~"4.."}[5m]) > 10
+        for: 3m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "High 4xx error rate detected"
+          description: "4xx error rate is {{ $value }} errors/second"
+
+  - name: neurodx-business-alerts
+    rules:
+      # Low model usage (business impact)
+      - alert: LowModelUsage
+        expr: rate(model_inference_total[1h]) < 1
+        for: 30m
+        labels:
+          severity: info
+          service: business
+        annotations:
+          summary: "Low model usage detected"
+          description: "Model inference rate is {{ $value }} inferences/hour"
+
+      # No new patient data
+      - alert: NoNewPatientData
+        expr: increase(patient_records_created_total[24h]) == 0
+        for: 1h
+        labels:
+          severity: info
+          service: business
+        annotations:
+          summary: "No new patient data in 24 hours"
+          description: "No new patient records have been created in the last 24 hours"
