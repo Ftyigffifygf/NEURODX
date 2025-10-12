@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: influxdb
+  namespace: neurodx-multimodal
+  labels:
+    app: influxdb
+    component: timeseries
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: influxdb
+  template:
+    metadata:
+      labels:
+        app: influxdb
+        component: timeseries
+    spec:
+      containers:
+        - name: influxdb
+          image: influxdb:2.7-alpine
+          ports:
+            - containerPort: 8086
+              name: http
+          env:
+            - name: DOCKER_INFLUXDB_INIT_MODE
+              value: "setup"
+            - name: DOCKER_INFLUXDB_INIT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: neurodx-secrets
+                  key: INFLUXDB_ADMIN_USER
+            - name: DOCKER_INFLUXDB_INIT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: neurodx-secrets
+                  key: INFLUXDB_ADMIN_PASSWORD
+            - name: DOCKER_INFLUXDB_INIT_ORG
+              valueFrom:
+                configMapKeyRef:
+                  name: neurodx-config
+                  key: INFLUXDB_ORG
+            - name: DOCKER_INFLUXDB_INIT_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: neurodx-config
+                  key: INFLUXDB_BUCKET
+          volumeMounts:
+            - name: influxdb-storage
+              mountPath: /var/lib/influxdb2
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8086
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8086
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: influxdb-storage
+          persistentVolumeClaim:
+            claimName: influxdb-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: influxdb-service
+  namespace: neurodx-multimodal
+  labels:
+    app: influxdb
+spec:
+  selector:
+    app: influxdb
+  ports:
+    - name: http
+      port: 8086
+      targetPort: 8086
+      protocol: TCP
+  type: ClusterIP

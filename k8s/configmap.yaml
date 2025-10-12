@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: neurodx-config
+  namespace: neurodx-multimodal
+data:
+  # Application configuration
+  FLASK_ENV: "production"
+  PYTHONPATH: "/app/src"
+
+  # Database configuration
+  POSTGRES_HOST: "postgres-service"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "neurodx"
+
+  # Redis configuration
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+
+  # InfluxDB configuration
+  INFLUXDB_HOST: "influxdb-service"
+  INFLUXDB_PORT: "8086"
+  INFLUXDB_ORG: "neurodx"
+  INFLUXDB_BUCKET: "sensor_data"
+
+  # MinIO configuration
+  MINIO_HOST: "minio-service"
+  MINIO_PORT: "9000"
+
+  # MONAI Label configuration
+  MONAI_LABEL_HOST: "monai-label-service"
+  MONAI_LABEL_PORT: "8000"
+
+  # Monitoring configuration
+  PROMETHEUS_HOST: "prometheus-service"
+  PROMETHEUS_PORT: "9090"
+
+  # Logging configuration
+  LOG_LEVEL: "INFO"
+  LOG_FORMAT: "json"

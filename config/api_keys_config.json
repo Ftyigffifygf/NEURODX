@@ -1,0 +1,103 @@
+{
+    "api_keys": [
+        {
+            "key_id": "medical_text_primary",
+            "api_key": "${NVIDIA_API_KEY_MEDICAL_TEXT}",
+            "endpoint": "https://integrate.api.nvidia.com/v1",
+            "max_rpm": 1000,
+            "max_tpm": 50000,
+            "priority": 3,
+            "task_types": [
+                "medical_text_analysis",
+                "diagnostic_report_generation"
+            ],
+            "cost_per_token": 0.0001,
+            "description": "Primary key for medical text analysis and report generation"
+        },
+        {
+            "key_id": "genomics_specialist",
+            "api_key": "${NVIDIA_API_KEY_GENOMICS}",
+            "endpoint": "https://integrate.api.nvidia.com/v1",
+            "max_rpm": 500,
+            "max_tpm": 25000,
+            "priority": 3,
+            "task_types": [
+                "genomics_analysis"
+            ],
+            "cost_per_token": 0.0002,
+            "description": "Dedicated key for genomics analysis workflows"
+        },
+        {
+            "key_id": "streaming_realtime",
+            "api_key": "${NVIDIA_API_KEY_STREAMING}",
+            "endpoint": "https://integrate.api.nvidia.com/v1",
+            "max_rpm": 2000,
+            "max_tpm": 100000,
+            "priority": 2,
+            "task_types": [
+                "streaming_insights",
+                "real_time_inference"
+            ],
+            "cost_per_token": 0.00015,
+            "description": "High-throughput key for streaming and real-time processing"
+        },
+        {
+            "key_id": "batch_processing",
+            "api_key": "${NVIDIA_API_KEY_BATCH}",
+            "endpoint": "https://integrate.api.nvidia.com/v1",
+            "max_rpm": 200,
+            "max_tpm": 200000,
+            "priority": 1,
+            "task_types": [
+                "batch_processing",
+                "longitudinal_tracking"
+            ],
+            "cost_per_token": 0.00008,
+            "description": "Cost-optimized key for batch processing and longitudinal analysis"
+        },
+        {
+            "key_id": "multimodal_fusion",
+            "api_key": "${NVIDIA_API_KEY_MULTIMODAL}",
+            "endpoint": "https://integrate.api.nvidia.com/v1",
+            "max_rpm": 800,
+            "max_tpm": 40000,
+            "priority": 2,
+            "task_types": [
+                "multi_modal_fusion"
+            ],
+            "cost_per_token": 0.00012,
+            "description": "Specialized key for multi-modal data fusion tasks"
+        },
+        {
+            "key_id": "backup_general",
+            "api_key": "${NVIDIA_API_KEY_BACKUP}",
+            "endpoint": "https://integrate.api.nvidia.com/v1",
+            "max_rpm": 600,
+            "max_tpm": 30000,
+            "priority": 1,
+            "task_types": [],
+            "cost_per_token": 0.0001,
+            "description": "General purpose backup key for any task type"
+        }
+    ],
+    "load_balancing": {
+        "strategy": "round_robin",
+        "enable_failover": true,
+        "health_check_interval": 60,
+        "rate_limit_buffer": 0.1
+    },
+    "monitoring": {
+        "enable_metrics": true,
+        "enable_cost_tracking": true,
+        "enable_performance_analytics": true,
+        "alert_on_rate_limits": true,
+        "alert_on_low_success_rate": true,
+        "success_rate_threshold": 90.0
+    },
+    "optimization": {
+        "auto_deactivate_failing_keys": true,
+        "auto_reactivate_recovered_keys": true,
+        "cost_optimization_enabled": true,
+        "prefer_lower_cost_keys": true
+    }
+}

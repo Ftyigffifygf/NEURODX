@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: neurodx-multimodal
+  labels:
+    name: neurodx-multimodal
+    app: neurodx-multimodal

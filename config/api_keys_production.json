@@ -1,0 +1,88 @@
+{
+    "api_keys": [
+        {
+            "key_id": "medical_text_primary",
+            "api_key": "nvapi-8c6tEjUiGKR-MeMyuSx_we6afFc6nKZqRkd-hLrLDNQCJupsFjNfIrSH86C5qGUSnvapi-JPyvgmVsh1CpV-iaz_yqaTn5RpsvIgHX5f7-3fX_8fYEr85-gZSSDSG8CaZisyzO",
+            "endpoint": "https://integrate.api.nvidia.com/v1",
+            "max_rpm": 1000,
+            "max_tpm": 50000,
+            "priority": 3,
+            "task_types": [
+                "medical_text_analysis",
+                "diagnostic_report_generation"
+            ],
+            "cost_per_token": 0.0001,
+            "description": "Primary key for medical text analysis and report generation"
+        },
+        {
+            "key_id": "genomics_specialist",
+            "api_key": "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",
+            "endpoint": "https://integrate.api.nvidia.com/v1",
+            "max_rpm": 500,
+            "max_tpm": 25000,
+            "priority": 3,
+            "task_types": [
+                "genomics_analysis"
+            ],
+            "cost_per_token": 0.0002,
+            "description": "Dedicated key for genomics analysis workflows"
+        },
+        {
+            "key_id": "streaming_realtime",
+            "api_key": "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",
+            "endpoint": "https://integrate.api.nvidia.com/v1",
+            "max_rpm": 2000,
+            "max_tpm": 100000,
+            "priority": 2,
+            "task_types": [
+                "streaming_insights",
+                "real_time_inference"
+            ],
+            "cost_per_token": 0.00015,
+            "description": "High-throughput key for streaming and real-time processing"
+        },
+        {
+            "key_id": "multimodal_fusion",
+            "api_key": "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",
+            "endpoint": "https://integrate.api.nvidia.com/v1",
+            "max_rpm": 800,
+            "max_tpm": 60000,
+            "priority": 2,
+            "task_types": [
+                "multi_modal_fusion",
+                "batch_processing",
+                "longitudinal_tracking"
+            ],
+            "cost_per_token": 0.00012,
+            "description": "Specialized key for multi-modal fusion and batch processing"
+        }
+    ],
+    "load_balancing": {
+        "strategy": "round_robin",
+        "enable_failover": true,
+        "health_check_interval": 60,
+        "rate_limit_buffer": 0.1
+    },
+    "monitoring": {
+        "enable_metrics": true,
+        "enable_cost_tracking": true,
+        "enable_performance_analytics": true,
+        "alert_on_rate_limits": true,
+        "alert_on_low_success_rate": true,
+        "success_rate_threshold": 90.0
+    },
+    "optimization": {
+        "auto_deactivate_failing_keys": true,
+        "auto_reactivate_recovered_keys": true,
+        "cost_optimization_enabled": true,
+        "prefer_lower_cost_keys": true
+    },
+    "multimodal_settings": {
+        "enable_fusion": true,
+        "enable_streaming": true,
+        "max_concurrent_requests": 10,
+        "batch_size": 32,
+        "fusion_confidence_threshold": 0.8,
+        "streaming_buffer_size": 100
+    }
+}

@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monai-label
+  namespace: neurodx-multimodal
+  labels:
+    app: monai-label
+    component: annotation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: monai-label
+  template:
+    metadata:
+      labels:
+        app: monai-label
+        component: annotation
+    spec:
+      containers:
+        - name: monai-label
+          image: neurodx/monai-label:latest
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: MONAI_LABEL_STUDIES
+              value: "/app/data/images"
+            - name: MONAI_LABEL_APP_DIR
+              value: "/app/monai_apps"
+          volumeMounts:
+            - name: data-volume
+              mountPath: /app/data
+            - name: models-volume
+              mountPath: /app/models
+          resources:
+            requests:
+              memory: "4Gi"
+              cpu: "2000m"
+              nvidia.com/gpu: 1
+            limits:
+              memory: "8Gi"
+              cpu: "4000m"
+              nvidia.com/gpu: 1
+          livenessProbe:
+            httpGet:
+              path: /info/
+              port: 8000
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            timeoutSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /info/
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 3
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: neurodx-data-pvc
+        - name: models-volume
+          persistentVolumeClaim:
+            claimName: neurodx-models-pvc
+      nodeSelector:
+        nvidia.com/gpu.present: "true"
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: monai-label-service
+  namespace: neurodx-multimodal
+  labels:
+    app: monai-label
+spec:
+  selector:
+    app: monai-label
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+  type: ClusterIP

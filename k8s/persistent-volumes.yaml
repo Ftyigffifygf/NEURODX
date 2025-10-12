@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: neurodx-data-pv
+  namespace: neurodx-multimodal
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: neurodx-storage
+  hostPath:
+    path: /data/neurodx/data
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: neurodx-models-pv
+  namespace: neurodx-multimodal
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: neurodx-storage
+  hostPath:
+    path: /data/neurodx/models
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-pv
+  namespace: neurodx-multimodal
+spec:
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: neurodx-storage
+  hostPath:
+    path: /data/neurodx/postgres
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis-pv
+  namespace: neurodx-multimodal
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: neurodx-storage
+  hostPath:
+    path: /data/neurodx/redis
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: influxdb-pv
+  namespace: neurodx-multimodal
+spec:
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: neurodx-storage
+  hostPath:
+    path: /data/neurodx/influxdb
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: minio-pv
+  namespace: neurodx-multimodal
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: neurodx-storage
+  hostPath:
+    path: /data/neurodx/minio
