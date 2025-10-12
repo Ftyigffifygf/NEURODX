@@ -1,0 +1,33 @@
+[Unit]
+Description=NeuroDx-MultiModal Monitoring Service
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=neurodx
+Group=neurodx
+WorkingDirectory=/opt/neurodx-multimodal
+Environment=PYTHONPATH=/opt/neurodx-multimodal
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 /opt/neurodx-multimodal/scripts/monitoring_service.py
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=neurodx-monitoring
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/neurodx-multimodal/logs
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target
