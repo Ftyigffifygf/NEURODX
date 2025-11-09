@@ -1,0 +1,35 @@
+name: Pylint
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint
+          # Install core ML/AI packages first
+          pip install torch torchvision numpy pandas scikit-learn tensorflow opencv-python pillow
+          # Install medical AI packages
+          pip install monai nibabel pydicom SimpleITK
+          # Install web/API packages
+          pip install fastapi uvicorn streamlit plotly psutil
+          # Install project requirements files (ignore errors for missing files)
+          if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
+          if [ -f neurodx/requirements.txt ]; then pip install -r neurodx/requirements.txt || true; fi
+          if [ -f neurodx/vision/requirements.txt ]; then pip install -r neurodx/vision/requirements.txt || true; fi
+          if [ -f neurodx/organoid_intelligence/requirements.txt ]; then pip install -r neurodx/organoid_intelligence/requirements.txt || true; fi
+          if [ -f streamlit_requirements.txt ]; then pip install -r streamlit_requirements.txt || true; fi
+      - name: Analysing the code with pylint
+        run: |
+          pylint $(git ls-files '*.py') --exit-zero
